@@ -19,7 +19,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -156,7 +158,10 @@ class WateeraViewModel(
         historyDaysCountState
     ) { habits, logs, selectedDayEpoch, historyCount ->
         buildTodayUiState(habits, logs, selectedDayEpoch, historyCount)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TodayUiState())
+    }
+        // Keep history grouping, streak calculations and progress aggregation off the UI thread.
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TodayUiState())
 
     private val statsInputs = combine(
         heatmapMonthState,
@@ -181,7 +186,10 @@ class WateeraViewModel(
             habitFilterId = inputs.third,
             language = settings.language
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StatsUiState())
+    }
+        // Statistics scan the full log history; never perform this work on the main thread.
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StatsUiState())
 
     fun selectDay(epochDay: Long) {
         if (epochDay <= todayKey.epochDay) {
