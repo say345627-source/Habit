@@ -1,0 +1,6 @@
+{
+  "name": "وتيرة",
+  "description": "تطبيق عصري لتتبّع العادات اليومية المستمرة بتقسيم الأجزاء، السلاسل، الخريطة الحرارية، والتذكيرات المحلية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
